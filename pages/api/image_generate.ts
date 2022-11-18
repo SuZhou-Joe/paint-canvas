@@ -29,33 +29,34 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   const { prompt } = req.query as { prompt: string };
-  const { data, status } = await axios.get('https://ik.imagekit.io/bcfqh1dt2/image_generate.png?ik-sdk-version=javascript-1.4.3&updatedAt=1668505872453', {
-    responseType: 'arraybuffer',
-  });
-  if (data && status >= 200 && status < 302) {
-    return res.json({
-      ok: true,
-      response: {
-        mimeType: 'image/png',
-        base64: Buffer.from(data).toString('base64')
-      }
-    });
-  }
-
-  return res.json({});
+  // const { data, status } = await axios.get('https://ik.imagekit.io/bcfqh1dt2/image_generate.png?ik-sdk-version=javascript-1.4.3&updatedAt=1668505872453', {
+  //   responseType: 'arraybuffer',
+  // });
+  // if (data && status >= 200 && status < 302) {
+  //   return res.json({
+  //     ok: true,
+  //     response: {
+  //       mimeType: 'image/png',
+  //       base64: Buffer.from(data).toString('base64')
+  //     }
+  //   });
+  // }
   const image = await generateAsync({
     prompt,
-    apiKey: 'sk-twzUaAQyKXXoRzPG2SQC4GuB5SFGs57eYWo3Sb0d6wyF7Y3q',
+    apiKey: 'sk-orcI02jiYxEiIDMNIkZnofc8k9MUToSQJrFco508uVELTciH',
     noStore: true
   }) as ImageResponseData;
 
   if (image.res.isOk) {
     const [imageItem] = image.images;
-    res
-      .setHeader('Content-Type', imageItem.mimeType)
-      .send(imageItem.buffer);
-    return ;
+    return res.json({
+      ok: true,
+      response: {
+        mimeType: imageItem.mimeType,
+        base64: Buffer.from(imageItem.buffer).toString('base64')
+      }
+    });
   }
 
-  res.json(image);
+  return res.json(image);
 }
