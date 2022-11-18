@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import styles from './index.module.css';
 import ImageBlock, { IImageBlockProps } from '../image-block';
-import { Point } from '../../../interface';
+import { Point } from '../../interface';
 
 export default function App() {
     const wrapperRef = useRef<ReactZoomPanPinchRef>(null);
@@ -23,7 +23,7 @@ export default function App() {
             y: - (y + 1/2) * blockWidth + innerHeight / 2,
         };
         wrapperRef.current?.setTransform(calculatedPoint.x, calculatedPoint.y, 1);
-    }, [wrapperRef.current]);
+    }, []);
     return (
         <TransformWrapper
             centerZoomedOut

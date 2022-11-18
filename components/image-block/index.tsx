@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Point } from '../../../interface';
+import { Point } from '../../interface';
 import styles from './index.module.css';
 
 export interface IImageBlockProps {
@@ -8,11 +8,12 @@ export interface IImageBlockProps {
 }
 
 export default function ImageBlock(props: IImageBlockProps) {
-    const onClick = useCallback(() => {
-        props.onClick && props.onClick(props.point);
-    }, [props.onClick, props.point]);
+    const { onClick, point } = props;
+    const onClickHandler = useCallback(() => {
+        onClick && onClick(props.point);
+    }, [onClick, point]);
     return (
-        <div className={styles.blockContainer} onClick={onClick}>
+        <div className={styles.blockContainer} onClick={onClickHandler}>
             {props.point.x}-{props.point.y}
         </div>
     );
