@@ -10,7 +10,7 @@ export interface IImageBlockProps {
 export default function ImageBlock(props: IImageBlockProps) {
     const { onClick, point } = props;
     const onClickHandler = useCallback(() => {
-        onClick && onClick(props.point);
+        onClick && onClick(point);
     }, [onClick, point]);
     return (
         <div className={styles.blockContainer} onClick={onClickHandler}>
