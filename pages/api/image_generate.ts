@@ -1,7 +1,15 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { generateAsync } from 'stability-client'
-import axios from 'axios';
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      API_URL: string;
+      WALLETCONNECT_PROJECT_ID: string;
+    }
+  }
+}
 
 interface ResponseData {
   isOk: boolean;
@@ -43,7 +51,7 @@ export default async function handler(
   // }
   const image = await generateAsync({
     prompt,
-    apiKey: 'sk-orcI02jiYxEiIDMNIkZnofc8k9MUToSQJrFco508uVELTciH',
+    apiKey: process.env.API_URL,
     noStore: true
   }) as ImageResponseData;
 
