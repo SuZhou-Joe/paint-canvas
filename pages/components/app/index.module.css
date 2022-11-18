@@ -1,0 +1,8 @@
+.bodyContainer {
+    min-width: 100vw;
+    min-height: 100vh;
+    /* padding: 5vh 10vw; */
+}
+.blockRow {
+    display: flex;
+}
