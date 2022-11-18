@@ -7,7 +7,7 @@ import { Point } from '../../interface';
 export default function App() {
     const wrapperRef = useRef<ReactZoomPanPinchRef>(null);
     const payload: number[][] = [];
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 100; i++) {
         payload.push([]);
         for (let j = 0; j < 100; j++) {
             payload[i].push(j);

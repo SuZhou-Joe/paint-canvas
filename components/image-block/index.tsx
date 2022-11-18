@@ -14,7 +14,6 @@ export default function ImageBlock(props: IImageBlockProps) {
     }, [onClick, point]);
     return (
         <div className={styles.blockContainer} onClick={onClickHandler}>
-            {props.point.x}-{props.point.y}
         </div>
     );
 }
