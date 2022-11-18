@@ -1,41 +1,41 @@
-import { Box } from "@chakra-ui/react";
-import AuthClient, { generateNonce } from "@walletconnect/auth-client";
-import { version } from "@walletconnect/auth-client/package.json";
+import SignClient from "@walletconnect/sign-client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import type { NextPage } from "next";
 import { useCallback, useEffect, useState } from "react";
-import DefaultView from "./DefaultView";
-import QrView from "./QrView";
-import SignedInView from "./SignedInView";
-
-console.log(`AuthClient@${version}`);
 
 const Home: NextPage = () => {
-  const [client, setClient] = useState<AuthClient | null>();
-  const [hasInitialized, setHasInitialized] = useState(false);
-  const [uri, setUri] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [client, setClient] = useState<SignClient | null>();
 
   const onSignIn = useCallback(() => {
     if (!client) return;
     client
-      .request({
-        aud: window.location.href,
-        domain: window.location.hostname,
-        chainId: "eip155:1",
-        nonce: generateNonce(),
+      .connect({
+        // pairingTopic: client.core.pairing.getPairings(),
+        requiredNamespaces: {
+          eip155: {
+            methods: [
+              "eth_sendTransaction",
+              "eth_signTransaction",
+              "eth_sign",
+              "personal_sign",
+              "eth_signTypedData",
+            ],
+            chains: ["eip155:1"],
+            events: ["chainChanged", "accountsChanged"],
+          },
+        },
       })
-      .then(({ uri }) => {
+      .then(({ uri, approval }) => {
         if (uri) {
           QRCodeModal.open(uri, () => {
             console.log("EVENT", "QR Code Modal closed");
           });
         }
       });
-  }, [client, setUri]);
+  }, [client]);
 
   useEffect(() => {
-    AuthClient.init({
+    SignClient.init({
       projectId: 'e5b3bced58a255397401952751ab9e25',
       metadata: {
         name: "paint-me",
@@ -46,46 +46,32 @@ const Home: NextPage = () => {
     })
       .then((authClient) => {
         setClient(authClient);
-        setHasInitialized(true);
       })
       .catch(console.error);
   }, []);
 
   useEffect(() => {
     if (!client) return;
-    client.on("auth_response", ({ params }) => {
-      debugger;
-      if ("code" in params) {
-        console.error(params);
-        return;
-      }
-      if ("error" in params) {
-        console.error(params.error);
-        return;
-      }
-      setAddress(params.result.p.iss.split(":")[4]);
+    onSignIn();
+    client.on("session_event", () => {
+      // Handle session events, such as "chainChanged", "accountsChanged", etc.
+    });
+    
+    client.on("session_update", ({ topic, params }) => {
+      const { namespaces } = params;
+      const _session = client.session.get(topic);
+      // Overwrite the `namespaces` of the existing session with the incoming one.
+      const updatedSession = { ..._session, namespaces };
+      // Integrate the updated session state into your dapp state.
+      console.log(updatedSession);
+    });
+    
+    client.on("session_delete", () => {
+      // Session was deleted -> reset the dapp state, clean up from user session, etc.
     });
   }, [client]);
 
-  const [view, changeView] = useState<"default" | "qr" | "signedIn">("default");
-
-  useEffect(() => {
-    if (uri) changeView("qr");
-  }, [uri, changeView]);
-
-  useEffect(() => {
-    if (address) changeView("signedIn");
-  }, [address, changeView]);
-
-  return (
-    <Box width="100%" height="100%">
-      {view === "default" && (
-        <DefaultView onClick={onSignIn} hasInitialized={hasInitialized} />
-      )}
-      {view === "qr" && <QrView uri={uri} />}
-      {view === "signedIn" && <SignedInView address={address} />}
-    </Box>
-  );
+  return null;
 };
 
 export default Home;
