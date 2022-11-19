@@ -51,7 +51,7 @@ export default async function handler(
   // }
   const image = await generateAsync({
     prompt,
-    apiKey: process.env.API_URL,
+    apiKey: 'sk-orcI02jiYxEiIDMNIkZnofc8k9MUToSQJrFco508uVELTciH',
     noStore: true
   }) as ImageResponseData;
 

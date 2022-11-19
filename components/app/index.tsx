@@ -2,9 +2,9 @@ import React, { useCallback, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from "react-zoom-pan-pinch";
 import { set } from 'lodash';
 import { ChakraProvider } from '@chakra-ui/react';
+import ConnectButton from '../connect-button';
 import ImageBlock, { IImageBlockProps } from '../image-block';
 import Actions from '../actions';
-import WalletConnect from '../wallet-connect';
 import { Point } from '../../interface';
 import styles from './index.module.css';
 
@@ -39,7 +39,9 @@ export default function App() {
     }
     return (
         <ChakraProvider>
-            <WalletConnect />
+            <div style={{ padding: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                <ConnectButton />
+            </div>
             <TransformWrapper
                 centerZoomedOut
                 minScale={0.05}
