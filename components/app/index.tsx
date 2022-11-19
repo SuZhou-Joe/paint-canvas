@@ -1,11 +1,17 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   TransformWrapper,
   TransformComponent,
   ReactZoomPanPinchRef,
 } from "react-zoom-pan-pinch";
 import { set } from "lodash";
-import { Spin } from 'antd';
+import { Spin } from "antd";
 import ConnectButton from "../connect-button";
 import ImageBlock, { IImageBlockProps } from "../image-block";
 import Actions from "../../containers/actions";
@@ -17,7 +23,9 @@ import { formatCanvas, getIdFromPoint, getLatestCanvas } from "../../utils";
 export default function App() {
   const wrapperRef = useRef<ReactZoomPanPinchRef>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [canvasMetadata, updateCanvasMetadata] = useState<Record<string, blockMetaData>>({});
+  const [canvasMetadata, updateCanvasMetadata] = useState<
+    Record<string, blockMetaData>
+  >({});
   const [focusedPoint, setFocusedPoint] = useState({} as Point);
   const [generateModalVisible, setGenerateModalVisible] = useState(false);
   const payload: {}[][] = [];
@@ -61,8 +69,8 @@ export default function App() {
         canvasMeta: canvasMetadata,
         updateCanvasMeta(point, payload) {
           canvasMetadata[getIdFromPoint(point)] = {
-            ...canvasMetadata[getIdFromPoint(point)] as object,
-            ...payload as object
+            ...(canvasMetadata[getIdFromPoint(point)] as object),
+            ...(payload as object),
           } as blockMetaData;
           updateCanvasMetadata({ ...canvasMetadata });
           return Promise.resolve(true);
@@ -74,25 +82,24 @@ export default function App() {
       >
         <ConnectButton />
       </div>
-      <Spin
-        spinning={loading}
+      <TransformWrapper
+        centerZoomedOut
+        minScale={0.005}
+        ref={wrapperRef}
+        doubleClick={{
+          disabled: true,
+        }}
       >
-        <TransformWrapper
-          centerZoomedOut
-          minScale={0.005}
-          ref={wrapperRef}
-          doubleClick={{
-            disabled: true,
-          }}
-        >
-          <TransformComponent>
+        <TransformComponent>
+          <Spin spinning={loading}>
             <div className={styles.bodyContainer}>
               {payloadState.map((rowBlocks, rowIndex) => {
                 return (
                   <div key={rowIndex} className={styles.blockRow}>
                     {rowBlocks.map((block, blockIndex) => {
                       const point = { y: rowIndex, x: blockIndex };
-                      const isFocused = getIdFromPoint(focusedPoint) === getIdFromPoint(point);
+                      const isFocused =
+                        getIdFromPoint(focusedPoint) === getIdFromPoint(point);
                       return (
                         <ImageBlock
                           blockData={canvasMetadata[getIdFromPoint(point)]}
@@ -107,13 +114,13 @@ export default function App() {
                 );
               })}
             </div>
-          </TransformComponent>
-          <Actions
-            visible={generateModalVisible}
-            onImageGenerated={onImageGenerated}
-          />
-        </TransformWrapper>
-      </Spin>
+          </Spin>
+        </TransformComponent>
+        <Actions
+          visible={generateModalVisible}
+          onImageGenerated={onImageGenerated}
+        />
+      </TransformWrapper>
     </CanvasContext.Provider>
   );
 }
