@@ -45,7 +45,7 @@ export default function Actions(props: {
           const provider = new ethers.providers.Web3Provider(ethereum);
           const signer = provider.getSigner(address);
           const oasisContract = new ethers.Contract(
-            "0xd46a28dD0Aaa89537714db809B8A964ba9799Cc3",
+            "0x1C4C9CA5DB0a30227F709BEAD5039b4CD01751D1",
             abi,
             signer
           );
