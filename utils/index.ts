@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Point } from "../interface";
+import { blockMetaData, Point } from "../interface";
 
 export const CANVAS_CID_KEY = 'canvas_cid';
 
@@ -47,4 +47,16 @@ export async function getLatestCanvas() {
   }
 
   return {};
+}
+
+export function formatCanvas(canvas: Record<string, blockMetaData>): Record<string, blockMetaData> {
+  return Object.entries(canvas).reduce((total, current) => {
+    return {
+      ...total,
+      [current[0]]: {
+        ...current[1],
+        image: getIpfsUrl(current[1].image as string)
+      }
+    };
+  }, {} as Record<string, blockMetaData>);
 }
