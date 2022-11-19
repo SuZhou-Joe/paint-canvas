@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   TransformWrapper,
   TransformComponent,
@@ -7,14 +7,19 @@ import {
 import { set } from "lodash";
 import ConnectButton from "../connect-button";
 import ImageBlock, { IImageBlockProps } from "../image-block";
-import Actions from "../actions";
-import { Point } from "../../interface";
+import Actions from "../../containers/actions";
+import { blockMetaData, Point } from "../../interface";
+import CanvasContext from "../../context/canvas-context";
 import styles from "./index.module.css";
+import { getIdFromPoint, getLatestCanvas } from "../../utils";
+import RequestContext from "../../context/request-context";
 
 export default function App() {
   const wrapperRef = useRef<ReactZoomPanPinchRef>(null);
+  const [canvasMetadata, updateCanvasMetadata] = useState<Record<string, blockMetaData>>({});
   const [focusedPoint, setFocusedPoint] = useState({} as Point);
   const [generateModalVisible, setGenerateModalVisible] = useState(false);
+  const requestContext = useContext(RequestContext);
   const payload: {}[][] = [];
   for (let i = 0; i < 100; i++) {
     payload.push([]);
@@ -40,8 +45,28 @@ export default function App() {
     set(payloadState, `${focusedPoint.y}.${focusedPoint.x}.image`, image);
     setPayloadState([...payloadState]);
   };
+  useEffect(() => {
+    (async () => {
+      const json = await getLatestCanvas();
+      updateCanvasMetadata(json);
+    })();
+  }, []);
   return (
-    <>
+    <CanvasContext.Provider
+      value={{
+        focusedPoint,
+        updateFocusedPoint: setFocusedPoint,
+        canvasMeta: canvasMetadata,
+        updateCanvasMeta(point, payload) {
+          canvasMetadata[getIdFromPoint(point)] = {
+            ...canvasMetadata[getIdFromPoint(point)] as object,
+            ...payload as object
+          } as blockMetaData;
+          updateCanvasMetadata({ ...canvasMetadata });
+          return Promise.resolve(true);
+        },
+      }}
+    >
       <div
         style={{ padding: "20px", display: "flex", justifyContent: "flex-end" }}
       >
@@ -61,16 +86,15 @@ export default function App() {
               return (
                 <div key={rowIndex} className={styles.blockRow}>
                   {rowBlocks.map((block, blockIndex) => {
-                    const isFocused =
-                      focusedPoint.x === blockIndex &&
-                      focusedPoint.y === rowIndex;
+                    const point = { y: rowIndex, x: blockIndex };
+                    const isFocused = getIdFromPoint(focusedPoint) === getIdFromPoint(point);
                     return (
                       <ImageBlock
-                        blockData={block}
+                        blockData={canvasMetadata[getIdFromPoint(point)]}
                         isFocused={isFocused}
-                        point={{ y: rowIndex, x: blockIndex }}
+                        point={point}
                         onClick={onZoomIn}
-                        key={`${rowIndex}-${blockIndex}`}
+                        key={getIdFromPoint(point)}
                       />
                     );
                   })}
@@ -84,6 +108,6 @@ export default function App() {
           onImageGenerated={onImageGenerated}
         />
       </TransformWrapper>
-    </>
+    </CanvasContext.Provider>
   );
 }

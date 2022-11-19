@@ -1,19 +1,18 @@
 import classNames from "classnames";
 import React, { useCallback, useRef } from "react";
-import { Point } from "../../interface";
+import { Spin } from 'antd';
+import { blockMetaData, Point } from "../../interface";
 import styles from "./index.module.css";
 
 export interface IImageBlockProps {
   onClick?: (point: Point) => void;
   point: Point;
   isFocused?: boolean;
-  blockData: {
-    image?: string
-  }
+  blockData: blockMetaData;
 }
 
 export default function ImageBlock(props: IImageBlockProps) {
-  const { onClick, point, isFocused } = props;
+  const { onClick, point, isFocused, blockData } = props;
   const onClickHandler = useCallback(() => {
     onClick && onClick(point);
   }, [onClick, point]);
@@ -25,7 +24,7 @@ export default function ImageBlock(props: IImageBlockProps) {
         [styles.blockContainer_focused]: isFocused
       })}
       style={{
-        backgroundImage: `url(${props.blockData.image})`
+        backgroundImage: `url(${props.blockData?.image})`
       }}
       onClick={e => e.stopPropagation()}
       onMouseDown={() => clickRef.current = Date.now()}
@@ -37,6 +36,7 @@ export default function ImageBlock(props: IImageBlockProps) {
         }
       }}
     >
+      {typeof blockData === 'string' ? <Spin /> : null}
     </div>
   );
 }

@@ -1,4 +1,9 @@
 export type Point = {
-    x: number;
-    y: number;
-}
+  x: number;
+  y: number;
+};
+
+export type blockMetaData = {
+  prompt: string;
+  image?: string;
+};
