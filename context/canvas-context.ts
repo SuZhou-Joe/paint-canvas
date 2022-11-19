@@ -5,7 +5,8 @@ export default React.createContext<{
   focusedPoint: Point | null;
   updateFocusedPoint: (focusedPoint: Point) => void;
   canvasMeta: Record<string, blockMetaData>;
-  updateCanvasMeta: (point: Point, payload: Partial<blockMetaData>) => Promise<any>
+  updateCanvasMeta: (point: Point, payload: Partial<blockMetaData>) => Promise<any>;
+  focusedMetaData?: blockMetaData;
 }>({
   focusedPoint: null,
   canvasMeta: {},
