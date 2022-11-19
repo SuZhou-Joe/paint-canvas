@@ -6,7 +6,7 @@ import axios, { Axios, AxiosResponse } from 'axios';
 import { useAccount } from 'wagmi';
 import RequestContext from '../../context/request-context';
 
-export default (props: { children: React.ReactNode }) => {
+export default function RequestProvider(props: { children: React.ReactNode }) {
     const { address } = useAccount();
     const { openConnectModal } = useConnectModal();
     const requestWithSigned = useRef<Axios["request"]>((config) => {

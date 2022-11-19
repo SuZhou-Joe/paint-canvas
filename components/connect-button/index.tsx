@@ -1,5 +1,5 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
-export default () => {
+export default function PaintMeConnectButton() {
   return <ConnectButton />;
 };
