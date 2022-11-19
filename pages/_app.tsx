@@ -21,7 +21,15 @@ import { publicProvider } from 'wagmi/providers/public';
 import RequestProvider from '../components/request-provider';
 
 const { chains, provider } = configureChains(
-    [chain.mainnet],
+    [{
+      id: 31415,
+      name: 'Filecoin — Wallaby testnet',
+      network: 'filecoin',
+      testnet: true,
+      rpcUrls: {
+        default: 'https://wallaby.node.glif.io/rpc/v0'
+      }
+    }],
     [
       alchemyProvider({ apiKey: 'UP7-vCgH4OfFwUygRDLg8dXpADY-zb3T' }),
       publicProvider()
