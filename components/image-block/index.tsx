@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { Point } from "../../interface";
 import styles from "./index.module.css";
 
@@ -17,6 +17,7 @@ export default function ImageBlock(props: IImageBlockProps) {
   const onClickHandler = useCallback(() => {
     onClick && onClick(point);
   }, [onClick, point]);
+  const clickRef = useRef(Date.now());
   return (
     <div
       className={classNames({
@@ -26,7 +27,15 @@ export default function ImageBlock(props: IImageBlockProps) {
       style={{
         backgroundImage: `url(${props.blockData.image})`
       }}
-      onClick={onClickHandler}
+      onClick={e => e.stopPropagation()}
+      onMouseDown={() => clickRef.current = Date.now()}
+      onMouseUp={() => {
+        if (Date.now() - clickRef.current < 200) {
+          setTimeout(() => {
+            onClickHandler();
+          }, 0);
+        }
+      }}
     >
     </div>
   );

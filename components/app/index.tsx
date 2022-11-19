@@ -49,7 +49,7 @@ export default function App() {
       </div>
       <TransformWrapper
         centerZoomedOut
-        minScale={0.05}
+        minScale={0.005}
         ref={wrapperRef}
         doubleClick={{
           disabled: true,
