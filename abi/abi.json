@@ -132,6 +132,11 @@
                 "internalType": "uint256",
                 "name": "_yNumber",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_tokenId",
+                "type": "uint256"
             }
         ],
         "name": "createOasis",
@@ -148,6 +153,57 @@
             }
         ],
         "name": "getApproved",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getCurrentTokenId",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getIpfsCID",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_tokenId",
+                "type": "uint256"
+            }
+        ],
+        "name": "getOwner",
         "outputs": [
             {
                 "internalType": "address",

@@ -45,7 +45,7 @@ export default function Actions(props: {
           const provider = new ethers.providers.Web3Provider(ethereum);
           const signer = provider.getSigner(address);
           const oasisContract = new ethers.Contract(
-            "0x7b35a95c5848C61741382a18A833ef460EBfCf22",
+            "0xd46a28dD0Aaa89537714db809B8A964ba9799Cc3",
             abi,
             signer
           );
@@ -56,6 +56,7 @@ export default function Actions(props: {
               focusedPoint.x,
               focusedPoint.y
             );
+            console.log(focusedPoint.x, focusedPoint.y)
             payload.tokenAddress = mint.hash;
           } catch (e: any) {
             message.error(e.message.replace(/\([^\)]*\)/, ''));
