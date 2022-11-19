@@ -66,17 +66,17 @@ export default function App() {
   }, []);
 
   async function createOasis() {
-    // const ethereum = (window as any).ethereum;
-    // const accounts = await ethereum.request({
-    //   method: "eth_requestAccounts",
-    // });
-    // const provider = new ethers.providers.Web3Provider(ethereum)
-    // const walletAddress = accounts[0]    // first account in MetaMask
-    // const signer = provider.getSigner(walletAddress)
+    const ethereum = (window as any).ethereum;
+    const accounts = await ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    const provider = new ethers.providers.Web3Provider(ethereum)
+    const walletAddress = accounts[0]    // first account in MetaMask
+    const signer = provider.getSigner(walletAddress)
 
         // Second parameter is chainId, 1 for Ethereum mainnet 
-        const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/UP7-vCgH4OfFwUygRDLg8dXpADY-zb3T", 31415);
-        const signer = new ethers.Wallet("PRIVATE KEY", provider);
+        // const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/UP7-vCgH4OfFwUygRDLg8dXpADY-zb3T", 31415);
+        // const signer = new ethers.Wallet("PRIVATE KEY", provider);
 
         const oasisContract = new ethers.Contract("0x7b35a95c5848C61741382a18A833ef460EBfCf22", abi, signer)
 
