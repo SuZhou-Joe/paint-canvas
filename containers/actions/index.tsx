@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Input, Button } from "antd";
+import { Input, Button, message } from "antd";
 import { EnterOutlined } from "@ant-design/icons";
 import { useRequest } from "ahooks";
 import { NFTStorage } from "nft.storage";
@@ -12,6 +12,9 @@ import styles from "./index.module.css";
 import CanvasContext from "../../context/canvas-context";
 import { blockMetaData, Point } from "../../interface";
 import { CANVAS_CID_KEY, dataURLToFile, getIdFromPoint, getIpfsUrl, getLatestCanvas } from "../../utils";
+import abi from "../../abi/abi.json"
+import { useAccount } from "wagmi";
+import { ethers } from "ethers";
 
 export default function Actions(props: {
   visible: boolean;
@@ -19,6 +22,7 @@ export default function Actions(props: {
 }) {
   const canvasContext = useContext(CanvasContext);
   const requestContext = useContext(RequestContext);
+  const { address } = useAccount();
   const { loading, runAsync } = useRequest(
     (name) =>
       requestContext.requestWithSigned({
@@ -30,21 +34,50 @@ export default function Actions(props: {
   );
   const { loading: uploadLoading, runAsync: uploadRunAsync } = useRequest(
     async () => {
-      const focusedMeta = canvasContext.canvasMeta[
-        getIdFromPoint(canvasContext.focusedPoint as Point)
-      ] as blockMetaData;
+      const focusedPoint = canvasContext.focusedPoint as Point;
+      const focusedMeta = canvasContext.focusedMetaData as blockMetaData;
       if (focusedMeta.image) {
+        let payload: blockMetaData = {
+          prompt,
+        };
+        if (!focusedMeta.tokenAddress) {
+          const ethereum = (window as any).ethereum;
+          const provider = new ethers.providers.Web3Provider(ethereum);
+          const signer = provider.getSigner(address);
+          const oasisContract = new ethers.Contract(
+            "0x7b35a95c5848C61741382a18A833ef460EBfCf22",
+            abi,
+            signer
+          );
+      
+          try {
+            const mint = await oasisContract.createOasis(
+              "//ipfs.moralis.io:2053/ipfs/QmR35ZYRTyt7sfMpwr2QpFvENCMAfrWzC7d7w7Pa6z3phf",
+              focusedPoint.x,
+              focusedPoint.y
+            );
+            payload.tokenAddress = mint.hash;
+          } catch (e: any) {
+            message.error(e.message.replace(/\([^\)]*\)/, ''));
+            return ;
+          }
+        }
+        
         const cid = await nftClient.storeBlob(dataURLToFile(focusedMeta.image));
+        payload.image = cid;
+
         let latestJson: Record<string, blockMetaData> = {};
         try {
           latestJson = await getLatestCanvas() || {};
         } catch (e) {
           latestJson = {}
         }
-        latestJson[getIdFromPoint(canvasContext.focusedPoint as Point)] = {
+
+        latestJson[getIdFromPoint(focusedPoint)] = {
           ...focusedMeta,
-          image: cid
+          ...payload
         };
+
         const canvasCid = await nftClient.storeBlob(new File(
           JSON.stringify(latestJson).split(''),
           'canvas_cid.json',
@@ -59,6 +92,9 @@ export default function Actions(props: {
           image: getIpfsUrl(cid),
         });
       }
+    },
+    {
+      manual: true
     }
   );
   const [prompt, setPrompt] = useState("");
@@ -84,7 +120,7 @@ export default function Actions(props: {
             );
           }}
           loading={loading}
-          disabled={loading}
+          disabled={loading || !prompt}
           size="large"
           style={{ width: "20%" }}
         >
@@ -99,6 +135,7 @@ export default function Actions(props: {
         size="large"
         loading={uploadLoading}
         onClick={uploadRunAsync}
+        disabled={uploadLoading || !canvasContext.focusedMetaData?.image || canvasContext.focusedMetaData?.image.startsWith('http')}
       >
         Upload
       </Button>

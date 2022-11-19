@@ -6,4 +6,5 @@ export type Point = {
 export type blockMetaData = {
   prompt: string;
   image?: string;
+  tokenAddress?: string;
 };

@@ -1,6 +1,5 @@
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -10,7 +9,7 @@ import {
   TransformComponent,
   ReactZoomPanPinchRef,
 } from "react-zoom-pan-pinch";
-import { create, set } from "lodash";
+import { set } from "lodash";
 import { Spin } from "antd";
 import ConnectButton from "../connect-button";
 import ImageBlock, { IImageBlockProps } from "../image-block";
@@ -19,9 +18,7 @@ import { blockMetaData, Point } from "../../interface";
 import CanvasContext from "../../context/canvas-context";
 import styles from "./index.module.css";
 import { formatCanvas, getIdFromPoint, getLatestCanvas } from "../../utils";
-import { useHover } from "ahooks";
-import { ethers } from "ethers";
-import abi from "../../abi/abi.json"
+import abi from "../../abi/abi.json";
 
 export default function App() {
   const wrapperRef = useRef<ReactZoomPanPinchRef>(null);
@@ -64,32 +61,13 @@ export default function App() {
       setLoading(false);
     })();
   }, []);
-
-  async function createOasis() {
-    const ethereum = (window as any).ethereum;
-    const accounts = await ethereum.request({
-      method: "eth_requestAccounts",
-    });
-    const provider = new ethers.providers.Web3Provider(ethereum)
-    const walletAddress = accounts[0]    // first account in MetaMask
-    const signer = provider.getSigner(walletAddress)
-
-        // Second parameter is chainId, 1 for Ethereum mainnet 
-        // const provider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/UP7-vCgH4OfFwUygRDLg8dXpADY-zb3T", 31415);
-        // const signer = new ethers.Wallet("PRIVATE KEY", provider);
-
-        const oasisContract = new ethers.Contract("0x7b35a95c5848C61741382a18A833ef460EBfCf22", abi, signer)
-
-        const mint = await oasisContract.createOasis("//ipfs.moralis.io:2053/ipfs/QmR35ZYRTyt7sfMpwr2QpFvENCMAfrWzC7d7w7Pa6z3phf", "1", "5")
-
-        console.log("Successfully minted" , mint)
-  }
   return (
     <CanvasContext.Provider
       value={{
         focusedPoint,
         updateFocusedPoint: setFocusedPoint,
         canvasMeta: canvasMetadata,
+        focusedMetaData: typeof focusedPoint.x === 'number' ? canvasMetadata[getIdFromPoint(focusedPoint)] : undefined,
         updateCanvasMeta(point, payload) {
           canvasMetadata[getIdFromPoint(point)] = {
             ...(canvasMetadata[getIdFromPoint(point)] as object),
@@ -101,10 +79,13 @@ export default function App() {
       }}
     >
       <div
-        style={{ padding: "20px", display: "flex", justifyContent: "flex-end", gap: "20px" }}
+        style={{
+          padding: "20px",
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: "20px",
+        }}
       >
-        <button style={{ padding: "20px", display: "flex", justifyContent: "flex-end", background: "white", borderRadius: "20px", fontWeight: "bold" }} 
-        onClick={createOasis}>Mint NFT</button>
         <ConnectButton />
       </div>
       <TransformWrapper
