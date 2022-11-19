@@ -1,0 +1,7 @@
+.inputContainer {
+    position: fixed;
+    bottom: 1vh;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
