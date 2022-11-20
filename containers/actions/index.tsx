@@ -132,16 +132,18 @@ export default function Actions(props: {
   const [prompt, setPrompt] = useState("");
   useEffect(() => {
     setIsOwner(false);
-    if (canvasContext.focusedMetaData?.tokenId) {
-      if (!address) {
+    (async () => {
+      if (canvasContext.focusedMetaData?.tokenId) {
+        if (!address) {
+          return ;
+        }
+        const contract = getContract(address);
+        const ownerAddress = await contract.getOwner(canvasContext.focusedMetaData?.tokenId);
+        setIsOwner(ownerAddress === address);
         return ;
       }
-      const contract = getContract(address);
-      const ownerAddress = contract.getOwner(canvasContext.focusedMetaData?.tokenId);
-      setIsOwner(ownerAddress === address);
-      return ;
-    }
-    setIsOwner(true);
+      setIsOwner(true);
+    })();
   }, [address, canvasContext.focusedMetaData]);
   return props.visible ? (
     <div className={styles.inputContainer}>
