@@ -7,4 +7,5 @@ export type blockMetaData = {
   prompt: string;
   image?: string;
   tokenAddress?: string;
+  tokenId?: string;
 };

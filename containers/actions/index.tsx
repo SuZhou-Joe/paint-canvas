@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { Input, Button, message } from "antd";
+import React, { useContext, useEffect, useState } from "react";
+import { Input, Button, message, notification } from "antd";
 import { EnterOutlined } from "@ant-design/icons";
 import { useRequest } from "ahooks";
 import { NFTStorage } from "nft.storage";
@@ -16,6 +16,19 @@ import abi from "../../abi/abi.json"
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
 
+export const getContract = (address: string) => {
+  const ethereum = (global as any).ethereum;
+  const provider = new ethers.providers.Web3Provider(ethereum);
+  const signer = provider.getSigner(address);
+  const oasisContract = new ethers.Contract(
+    "0x1C4C9CA5DB0a30227F709BEAD5039b4CD01751D1",
+    abi,
+    signer
+  );
+
+  return oasisContract;
+}
+
 export default function Actions(props: {
   visible: boolean;
   onImageGenerated: (image: string) => void;
@@ -23,6 +36,7 @@ export default function Actions(props: {
   const canvasContext = useContext(CanvasContext);
   const requestContext = useContext(RequestContext);
   const { address } = useAccount();
+  const [isOwner, setIsOwner] = useState(false);
   const { loading, runAsync } = useRequest(
     (name) =>
       requestContext.requestWithSigned({
@@ -32,6 +46,7 @@ export default function Actions(props: {
       manual: true,
     }
   );
+
   const { loading: uploadLoading, runAsync: uploadRunAsync } = useRequest(
     async () => {
       const focusedPoint = canvasContext.focusedPoint as Point;
@@ -40,33 +55,45 @@ export default function Actions(props: {
         let payload: blockMetaData = {
           prompt,
         };
+        notification.info({
+          message: 'Uploading your masterpiece...',
+          placement: 'bottomRight'
+        });
+        const cid = await nftClient.storeBlob(dataURLToFile(focusedMeta.image));
+        payload.image = cid;
+        notification.success({
+          message: 'Masterpiece uploaded',
+          placement: 'bottomRight'
+        });
         if (!focusedMeta.tokenAddress) {
-          const ethereum = (window as any).ethereum;
-          const provider = new ethers.providers.Web3Provider(ethereum);
-          const signer = provider.getSigner(address);
-          const oasisContract = new ethers.Contract(
-            "0x1C4C9CA5DB0a30227F709BEAD5039b4CD01751D1",
-            abi,
-            signer
-          );
-      
           try {
+            const oasisContract = getContract(address as string);
+            const tokenId = await oasisContract.getCurrentTokenId();
+            notification.info({
+              message: 'Occupying the block for you...',
+              placement: 'bottomRight'
+            });
             const mint = await oasisContract.createOasis(
-              "//ipfs.moralis.io:2053/ipfs/QmR35ZYRTyt7sfMpwr2QpFvENCMAfrWzC7d7w7Pa6z3phf",
+              getIpfsUrl(cid),
               focusedPoint.x,
               focusedPoint.y
             );
-            console.log(focusedPoint.x, focusedPoint.y)
             payload.tokenAddress = mint.hash;
+            payload.tokenId = tokenId;
+            notification.success({
+              message: 'The block is occupied...',
+              placement: 'bottomRight'
+            });
           } catch (e: any) {
             message.error(e.message.replace(/\([^\)]*\)/, ''));
             return ;
           }
         }
         
-        const cid = await nftClient.storeBlob(dataURLToFile(focusedMeta.image));
-        payload.image = cid;
-
+        notification.info({
+          message: 'Congratulations! The block is yours and please add more idea on it.',
+          placement: 'bottomRight'
+        });
         let latestJson: Record<string, blockMetaData> = {};
         try {
           latestJson = await getLatestCanvas() || {};
@@ -89,6 +116,10 @@ export default function Actions(props: {
         await requestContext.requestWithSigned({
           url: `/api/store_set?key=${CANVAS_CID_KEY}&value=${canvasCid}`,
         });
+        notification.success({
+          message: 'Metadata updated...',
+          placement: 'bottomRight'
+        });
         canvasContext.updateCanvasMeta(canvasContext.focusedPoint as Point, {
           image: getIpfsUrl(cid),
         });
@@ -99,14 +130,27 @@ export default function Actions(props: {
     }
   );
   const [prompt, setPrompt] = useState("");
+  useEffect(() => {
+    setIsOwner(false);
+    if (canvasContext.focusedMetaData?.tokenId) {
+      if (!address) {
+        return ;
+      }
+      const contract = getContract(address);
+      const ownerAddress = contract.getOwner(canvasContext.focusedMetaData?.tokenId);
+      setIsOwner(ownerAddress === address);
+      return ;
+    }
+    setIsOwner(true);
+  }, [address, canvasContext.focusedMetaData]);
   return props.visible ? (
     <div className={styles.inputContainer}>
       <Input.Group size="large" style={{ width: "50vw" }} compact>
         <Input
           size="large"
           style={{ width: "80%" }}
-          placeholder="Type something to generate your masterpiece"
-          disabled={loading}
+          placeholder={isOwner ? "Type something to generate your masterpiece" : "You are not the owner of this block"}
+          disabled={loading || !isOwner}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
