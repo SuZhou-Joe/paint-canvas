@@ -45,7 +45,6 @@ export default function App() {
       x: -(x + 1 / 2) * blockWidth + innerWidth / 2,
       y: -(y + 1 / 2) * blockWidth + innerHeight / 2,
     };
-    console.log("point is: ", point)
     setFocusedPoint(point);
     setGenerateModalVisible(true);
     wrapperRef.current?.setTransform(calculatedPoint.x, calculatedPoint.y, 1);
